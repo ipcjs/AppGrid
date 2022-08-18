@@ -5,10 +5,29 @@
 @interface SDWindow ()
 
 @property CFTypeRef window;
+@property (nonatomic) CGRect prevFrame;
 
 @end
 
 @implementation SDWindow
+static NSMutableDictionary *_prevFrameDict;
++ (NSMutableDictionary *)prevFrameDict{
+    if(!_prevFrameDict){
+        _prevFrameDict = [[NSMutableDictionary alloc] init];
+    }
+    return _prevFrameDict;
+}
+
+- (CGRect)prevFrame{
+    NSValue *key = @(CFHash(self.window));
+    NSValue *value = SDWindow.prevFrameDict[key];
+    return [value rectValue];
+}
+- (void)setPrevFrame:(CGRect)prevFrame{
+    NSValue *key = @(CFHash(self.window));
+    NSValue *value = @(prevFrame);
+    SDWindow.prevFrameDict[key] = value;
+}
 
 + (CGRect) realFrameForScreen:(NSScreen*)screen {
     NSScreen* primaryScreen = [[NSScreen screens] objectAtIndex:0];
@@ -257,7 +276,15 @@
 
 - (void) maximize {
     CGRect screenRect = [SDWindow realFrameForScreen:[self screen]];
-    [self setFrame:screenRect];
+    CGRect frame = [self frame];
+    CGRect prevFrame = self.prevFrame;
+    if (CGRectEqualToRect(screenRect, frame) && !CGRectIsEmpty(prevFrame)) {
+        [self setFrame:prevFrame];
+        self.prevFrame = CGRectZero;
+    } else {
+        self.prevFrame = frame;
+        [self setFrame:screenRect];
+    }
 }
 
 - (BOOL) focusWindow {

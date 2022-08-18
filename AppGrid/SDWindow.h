@@ -2,6 +2,8 @@
 
 @interface SDWindow : NSObject
 
+@property (class, nonatomic, readonly) NSMutableDictionary *prevFrameDict;
+
 + (NSArray*) allWindows;
 + (NSArray*) visibleWindows;
 + (SDWindow*) focusedWindow;
