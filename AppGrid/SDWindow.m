@@ -277,9 +277,10 @@ static NSMutableDictionary *_prevFrameDict;
 - (void) maximize {
     CGRect screenRect = [SDWindow realFrameForScreen:[self screen]];
     CGRect frame = [self frame];
-    if (CGRectEqualToRect(screenRect, frame)){
-        [self setFrame:self.prevFrame];
-        self.prevFrame = CGRectNull;
+    CGRect prevFrame = self.prevFrame;
+    if (CGRectEqualToRect(screenRect, frame) && !CGRectIsEmpty(prevFrame)) {
+        [self setFrame:prevFrame];
+        self.prevFrame = CGRectZero;
     } else {
         self.prevFrame = frame;
         [self setFrame:screenRect];
